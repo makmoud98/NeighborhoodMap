@@ -11,6 +11,7 @@ html, body {
     border-style: none;
 }
 #floating-panel {
+    display: none;
     position: absolute;
     top: 80px;
     left: 10px;
