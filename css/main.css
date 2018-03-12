@@ -1,0 +1,23 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#map {
+    height: 100%;
+}
+#filter-box {
+    width: 100%;
+    border-style: none;
+}
+#floating-panel {
+    position: absolute;
+    top: 80px;
+    left: 10px;
+    z-index: 5;
+    background-color: #fff;
+    padding: 5px;
+}
+.list-group-item:hover{
+    background-color: #999;
+}

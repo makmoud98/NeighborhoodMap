@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/main.css" rel="stylesheet">
+    </head>
+    </head>
+    <body>
+        <div id="floating-panel">
+            <input id="filter-box" type="text" placeholder="Filter.." data-bind="value: query, valueUpdate: 'keyup'"></input>
+            <ul class="list-group" data-bind="template: {name:'location', foreach: processFilter}"></ul>
+            <script type="text/html" id="location">
+                <li class="list-group-item" data-bind="text: title, click: $parent.openWindow"></li>
+            </script>
+        </div>
+        <div id="map"></div>
+        <!-- scripts -->
+        <script src="js/jquery-3.3.1.min.js"></script>
+        <script src="js/knockout-3.4.2.js"></script>
+        <script src="js/map.js"></script>
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGJ4hhxEq8NBGPyLfmcQG1OsNp909oq30&callback=initMap">
+        </script>
+        <script src="js/bootstrap.js"></script>
+    </body>
+</html>
