@@ -54,7 +54,7 @@ function initMap() {
 			v: '20170801',
     		ll: viewModel.center.lat + "," + viewModel.center.lng,
     		section: "topPicks",
-    		limit: 5
+    		limit: 20
     	},
     	success: function (data){
 			for(var i in data.response.groups[0].items) {
