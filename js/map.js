@@ -23,6 +23,17 @@ var viewModel = new function MapViewModel() {
 	        var title = location.title.toLowerCase();
 	        return title.indexOf(query) >= 0;
 	    });
+	    for(var i = 0; i < self.markers.length; i++){
+		    var marker = self.markers[i];
+		    marker.setVisible(false);
+		    for(var j = 0; j < result.length; j++){
+		    	var location = result[j];
+		    	if(marker.title == location.title){
+		    		marker.setVisible(true);
+		    		break;
+		    	}
+		    }
+		}
 	    if(result.length == 0){
 	    	return {title: "No results found", position: self.center};
 	    }
