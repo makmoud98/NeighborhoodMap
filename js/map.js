@@ -1,9 +1,9 @@
 var map = null;
 var infoWindow = null;
+var center = {lat: 41.8310086, lng: -87.6288022};
 
-var viewModel = new function MapViewModel() {
+var viewModel = new function() {
 	var self = this;
-	self.center = {lat: 41.8310086, lng: -87.6288022};
 	self.query = ko.observable("");
 	self.locations = ko.observableArray();
 	self.markers = [];
@@ -36,17 +36,17 @@ var viewModel = new function MapViewModel() {
 		    }
 		}
 		// creates a location object to show when no results were found
-	    if(result.length == 0){
-	    	return {title: "No results found", position: self.center};
+	    if(result.length === 0){
+	    	return {title: "No results found", position: center};
 	    }
 	    return result;
 	});
-}
+}();
 
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 14,
-        center: viewModel.center
+        center: center
     });
     infoWindow = new google.maps.InfoWindow();
     $.ajax("https://api.foursquare.com/v2/venues/explore", {
@@ -54,12 +54,12 @@ function initMap() {
     		client_id: '3TFGQXNXYNCJRGVH0G2ZMJ3PC2QDVMCCYSUSEEBPQSUP4WTL',
 			client_secret: 'FSRAYMNIBH2ZPDHL4IMTL5Q1F1FT2YCS0NXRAQQV4P0E43M2',
 			v: '20170801',
-    		ll: viewModel.center.lat + "," + viewModel.center.lng,
+    		ll: center.lat + "," + center.lng,
     		section: "topPicks",
     		limit: 20
     	},
     	success: function (data){
-			for(var i in data.response.groups[0].items) {
+			for(var i = 0; i < data.response.groups[0].items.length; i++) {
 				var item = data.response.groups[0].items[i];
 				var info = "";
 				// not all data will be available for all venues, check are made to avoid null pointers
@@ -67,7 +67,7 @@ function initMap() {
 				else if (item.venue.name) info += "<h5>" + item.venue.name + "</h5>";
 				if (item.venue.location) {
 					if(item.venue.location.address)
-						info += "<p>" + item.venue.location.address + "</p>"
+						info += "<p>" + item.venue.location.address + "</p>";
 				}
 				if (item.venue.hours) {
 					if(item.venue.hours.status)
@@ -77,7 +77,7 @@ function initMap() {
 
 				var location = {title: item.venue.name,
 								position: {lat: item.venue.location.lat,
-										   lng: item.venue.location.lng} }
+										   lng: item.venue.location.lng} };
 				// stores loactions in the viewModel to be displayed on the list view
 				viewModel.locations.push(location);
 				// info is added to the marker to be used when setting info window
@@ -89,10 +89,7 @@ function initMap() {
 					animation: google.maps.Animation.DROP
 				});
 				viewModel.markers.push(marker);
-				marker.addListener("click", function (){
-					setInfoWindow(map, this, infoWindow);
-					animateMarker(this);
-				});
+				marker.addListener("click", onMarkerClick);
 			}
 			// the panel is hidden until the ajax request is complete
 			document.getElementById("floating-panel").style.display = "inline";
@@ -103,9 +100,14 @@ function initMap() {
 			// but hide filter box
 			document.getElementById("filter-box").style.display = "none";
 			// this will create a location that servers as an error message
-			viewModel.locations.push({title: "There was an issue communicating with the Foursquare API", position: self.center})
+			viewModel.locations.push({title: "There was an issue communicating with the Foursquare API", position: self.center});
 		}
     });
+}
+
+function onMarkerClick() {
+	setInfoWindow(map, this, infoWindow);
+	animateMarker(this);
 }
 
 // this function adapted from udacity nanodegree program lesson 7 part 7
