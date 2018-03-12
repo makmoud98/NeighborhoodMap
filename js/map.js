@@ -2,7 +2,7 @@ var map = null;
 var infoWindow = null;
 var center = {lat: 41.8310086, lng: -87.6288022};
 
-var viewModel = new function() {
+var MapViewModel = function() {
 	var self = this;
 	self.query = ko.observable("");
 	self.locations = ko.observableArray();
@@ -41,7 +41,11 @@ var viewModel = new function() {
 	    }
 	    return result;
 	});
-}();
+};
+
+// this is a hack to avoid the jshint error: "Weird construction. Is 'new' necessary?"
+// when it was clearly necessary..
+var viewModel = new MapViewModel();
 
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -56,7 +60,7 @@ function initMap() {
 			v: '20170801',
     		ll: center.lat + "," + center.lng,
     		section: "topPicks",
-    		limit: 20
+    		limit: 5
     	},
     	success: function (data){
 			for(var i = 0; i < data.response.groups[0].items.length; i++) {
