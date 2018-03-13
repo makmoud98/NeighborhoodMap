@@ -4,6 +4,8 @@ var center = {lat: 41.8310086, lng: -87.6288022};
 
 var MapViewModel = function() {
 	var self = this;
+	self.showPanel = ko.observable(false);
+	self.showFilter = ko.observable(true);
 	self.query = ko.observable("");
 	self.locations = ko.observableArray();
 	self.markers = [];
@@ -26,13 +28,19 @@ var MapViewModel = function() {
 	    // hide markers that were not in the filter results
 	    for(var i = 0; i < self.markers.length; i++){
 		    var marker = self.markers[i];
-		    marker.setVisible(false);
+		    var visible = false;
 		    for(var j = 0; j < result.length; j++){
 		    	var location = result[j];
 		    	if(marker.title == location.title){
-		    		marker.setVisible(true);
+		    		visible = true;
 		    		break;
 		    	}
+		    }
+		    marker.setVisible(visible);
+		    // if infowindow is open and this is the marker its open on and this marker has been hidden
+		    if(infoWindow.marker && infoWindow.marker.title == marker.title && !visible){
+		    	// then close the window
+		    	infoWindow.close();
 		    }
 		}
 		// creates a location object to show when no results were found
@@ -61,52 +69,51 @@ function initMap() {
     		ll: center.lat + "," + center.lng,
     		section: "topPicks",
     		limit: 5
-    	},
-    	success: function (data){
-			for(var i = 0; i < data.response.groups[0].items.length; i++) {
-				var item = data.response.groups[0].items[i];
-				var info = "";
-				// not all data will be available for all venues, check are made to avoid null pointers
-				if (item.venue.url) info += '<h5><a href="'+ item.venue.url + '">' + item.venue.name + '</a></h5>';
-				else if (item.venue.name) info += "<h5>" + item.venue.name + "</h5>";
-				if (item.venue.location) {
-					if(item.venue.location.address)
-						info += "<p>" + item.venue.location.address + "</p>";
-				}
-				if (item.venue.hours) {
-					if(item.venue.hours.status)
-						info += "<p>" + item.venue.hours.status + "</p>";
-				}
-
-
-				var location = {title: item.venue.name,
-								position: {lat: item.venue.location.lat,
-										   lng: item.venue.location.lng} };
-				// stores loactions in the viewModel to be displayed on the list view
-				viewModel.locations.push(location);
-				// info is added to the marker to be used when setting info window
-				var marker = new google.maps.Marker({
-					position: {lat: location.position.lat, lng: location.position.lng},
-					map: map,
-					title: location.title,
-					info: info,
-					animation: google.maps.Animation.DROP
-				});
-				viewModel.markers.push(marker);
-				marker.addListener("click", onMarkerClick);
+    	}
+    })
+    .done(function(data) {
+    	for(var i = 0; i < data.response.groups[0].items.length; i++) {
+			var item = data.response.groups[0].items[i];
+			var info = '<div id="info-window">';
+			// not all data will be available for all venues, check are made to avoid null pointers
+			if (item.venue.url) info += '<h5><a href="'+ item.venue.url + '">' + item.venue.name + '</a></h5>';
+			else if (item.venue.name) info += "<h5>" + item.venue.name + "</h5>";
+			if (item.venue.location) {
+				if(item.venue.location.address)
+					info += "<p>" + item.venue.location.address + "</p>";
 			}
-			// the panel is hidden until the ajax request is complete
-			document.getElementById("floating-panel").style.display = "inline";
-		},
-		error: function(err){
-			// show panel..
-			document.getElementById("floating-panel").style.display = "inline";
-			// but hide filter box
-			document.getElementById("filter-box").style.display = "none";
-			// this will create a location that servers as an error message
-			viewModel.locations.push({title: "There was an issue communicating with the Foursquare API", position: self.center});
+			if (item.venue.hours) {
+				if(item.venue.hours.status)
+					info += "<p>" + item.venue.hours.status + "</p>";
+			}
+
+
+			var location = {title: item.venue.name,
+							position: {lat: item.venue.location.lat,
+									   lng: item.venue.location.lng} };
+			// stores loactions in the viewModel to be displayed on the list view
+			viewModel.locations.push(location);
+			// info is added to the marker to be used when setting info window
+			var marker = new google.maps.Marker({
+				position: {lat: location.position.lat, lng: location.position.lng},
+				map: map,
+				title: location.title,
+				info: info,
+				animation: google.maps.Animation.DROP
+			});
+			viewModel.markers.push(marker);
+			marker.addListener("click", onMarkerClick);
 		}
+		// the panel is hidden until the ajax request is complete
+		viewModel.showPanel(true);
+    })
+    .fail(function(error) {
+    	showErrorMessage("There was an issue communicating with the Foursquare API");
     });
+}
+
+function googleMapsError() {
+	showErrorMessage("There was an issue communicating with the Google Maps API");
 }
 
 function onMarkerClick() {
@@ -134,6 +141,16 @@ function animateMarker(marker) {
 	setTimeout(function() {
 		marker.setAnimation(null);
 	}, 1000);
+}
+
+// this shows an error where the list view would be rendered
+function showErrorMessage(error) {
+	// this will create a location that servers as an error message
+	viewModel.locations.push({title: error, position: viewModel.center});
+	// show panel..
+	viewModel.showPanel(true);
+	// but hide filter box
+	viewModel.showFilter(false);
 }
 
 ko.applyBindings(viewModel);

@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="css/bootstrap.css" rel="stylesheet">
         <link href="css/main.css" rel="stylesheet">
     </head>
     </head>
     <body>
-        <div id="floating-panel">
-            <input id="filter-box" type="text" placeholder="Filter.." data-bind="value: query, valueUpdate: 'keyup'"></input>
+        <div id="floating-panel" data-bind="visible: showPanel">
+            <input id="filter-box" type="text" placeholder="Filter.." data-bind="value: query, valueUpdate: 'keyup', visible: showFilter"></input>
             <ul class="list-group" data-bind="template: {name:'location', foreach: processFilter}"></ul>
             <script type="text/html" id="location">
                 <li class="list-group-item" data-bind="text: title, click: $parent.openWindow"></li>
@@ -19,7 +21,8 @@
         <script src="js/knockout-3.4.2.js"></script>
         <script src="js/map.js"></script>
         <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGJ4hhxEq8NBGPyLfmcQG1OsNp909oq30&callback=initMap">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGJ4hhxEq8NBGPyLfmcQG1OsNp909oq30&callback=initMap"
+            onerror="googleMapsError()">
         </script>
         <script src="js/bootstrap.js"></script>
     </body>
